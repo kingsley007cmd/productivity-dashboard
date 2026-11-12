@@ -119,12 +119,6 @@ export default function ProjectDetail({ project, darkMode, onToggleDark, onBack 
         {/* KPIs */}
         <KpiCards kpi={kpi} loading={loading} />
 
-        {/* Chart */}
-        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-sm p-6">
-          <h2 className="text-base font-semibold mb-4">Task Completion Trend</h2>
-          <TrendChart tasks={tasks} dateRange={dateRange} />
-        </div>
-
         {/* Table */}
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
@@ -139,6 +133,12 @@ export default function ProjectDetail({ project, darkMode, onToggleDark, onBack 
             onDelete={setDeletingTask}
             onQuickComplete={handleQuickComplete}
           />
+        </div>
+
+        {/* Chart */}
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-sm p-6">
+          <h2 className="text-base font-semibold mb-4">Task Completion Trend</h2>
+          <TrendChart tasks={tasks} dateRange={dateRange} />
         </div>
       </main>
 
