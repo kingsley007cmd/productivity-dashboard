@@ -15,14 +15,16 @@ app.use(express.json())
 // ─── DB Helpers ───────────────────────────────────────────────────────────────
 function readDB() {
   if (!fs.existsSync(DB_FILE)) {
-    return { tasks: [], projects: [], nextTaskId: 1, nextProjectId: 1 }
+    return { tasks: [], projects: [], members: [], nextTaskId: 1, nextProjectId: 1, nextMemberId: 1 }
   }
   const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'))
   return {
     tasks:         data.tasks         || [],
     projects:      data.projects      || [],
+    members:       data.members       || [],
     nextTaskId:    data.nextTaskId    || data.nextId || 1,
     nextProjectId: data.nextProjectId || 1,
+    nextMemberId:  data.nextMemberId  || 1,
   }
 }
 function writeDB(data) {
@@ -76,6 +78,66 @@ app.delete('/api/projects/:id', (req, res) => {
   db.projects.splice(idx, 1)
   // also remove associated tasks
   db.tasks = db.tasks.filter(t => t.project_id !== parseInt(req.params.id))
+  writeDB(db)
+  res.json({ success: true })
+})
+
+// ─── Member Routes ────────────────────────────────────────────────────────────
+
+// GET /api/members?project_id=
+app.get('/api/members', (req, res) => {
+  const { project_id } = req.query
+  const { members } = readDB()
+  if (!project_id) {
+    return res.json(members)
+  }
+  const pId = parseInt(project_id)
+  const filtered = members.filter(m => 
+    m.all_projects || (Array.isArray(m.project_ids) && m.project_ids.includes(pId))
+  )
+  res.json(filtered)
+})
+
+// POST /api/members
+app.post('/api/members', (req, res) => {
+  const { name, all_projects, project_ids } = req.body
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Name is required' })
+  }
+  const db = readDB()
+  const member = {
+    id: db.nextMemberId++,
+    name: name.trim(),
+    all_projects: all_projects !== false, // default true
+    project_ids: Array.isArray(project_ids) ? project_ids.map(Number) : [],
+    created_at: new Date().toISOString().split('T')[0]
+  }
+  db.members.push(member)
+  writeDB(db)
+  res.status(201).json(member)
+})
+
+// PATCH /api/members/:id
+app.patch('/api/members/:id', (req, res) => {
+  const db = readDB()
+  const idx = db.members.findIndex(m => m.id === parseInt(req.params.id))
+  if (idx === -1) return res.status(404).json({ error: 'Member not found' })
+
+  const { name, all_projects, project_ids } = req.body
+  if (name !== undefined) db.members[idx].name = name.trim()
+  if (all_projects !== undefined) db.members[idx].all_projects = Boolean(all_projects)
+  if (project_ids !== undefined) db.members[idx].project_ids = Array.isArray(project_ids) ? project_ids.map(Number) : []
+
+  writeDB(db)
+  res.json(db.members[idx])
+})
+
+// DELETE /api/members/:id
+app.delete('/api/members/:id', (req, res) => {
+  const db = readDB()
+  const idx = db.members.findIndex(m => m.id === parseInt(req.params.id))
+  if (idx === -1) return res.status(404).json({ error: 'Member not found' })
+  db.members.splice(idx, 1)
   writeDB(db)
   res.json({ success: true })
 })

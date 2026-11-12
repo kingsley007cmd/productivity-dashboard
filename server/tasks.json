@@ -1,1 +1,8 @@
-{ "tasks": [], "projects": [], "nextTaskId": 1, "nextProjectId": 1 }
+{
+  "tasks": [],
+  "projects": [],
+  "members": [],
+  "nextTaskId": 1,
+  "nextProjectId": 1,
+  "nextMemberId": 1
+}

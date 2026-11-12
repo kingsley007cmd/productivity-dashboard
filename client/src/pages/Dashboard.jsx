@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import {
   Plus, Moon, Sun, Search, ChevronDown, ArrowUpDown,
-  LayoutGrid, LayoutList, FolderOpen
+  LayoutGrid, LayoutList, FolderOpen, Users
 } from 'lucide-react'
 import ProjectRow   from '../components/ProjectRow'
 import ProjectCard  from '../components/ProjectCard'
 import ProjectModal from '../components/ProjectModal'
+import ManageMembersModal from '../components/ManageMembersModal'
 import DueToday     from '../components/DueToday'
 import WeeklyActivity from '../components/WeeklyActivity'
 import { toast } from '../components/ToastContainer'
@@ -41,6 +42,7 @@ export default function Dashboard({ darkMode, onToggleDark, onOpenProject }) {
   const [showSort,     setShowSort]     = useState(false)
   const [showFilter,   setShowFilter]   = useState(false)
   const [modalOpen,    setModalOpen]    = useState(false)
+  const [manageMembersOpen, setManageMembersOpen] = useState(false)
   const [editingProj,  setEditingProj]  = useState(null)
 
   useEffect(() => { fetchAll() }, [])
@@ -144,6 +146,12 @@ export default function Dashboard({ darkMode, onToggleDark, onOpenProject }) {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setManageMembersOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white/70 dark:bg-gray-800/70 hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-xl shadow-sm border border-white/80 dark:border-gray-700 transition-colors"
+          >
+            <Users size={15} /> Team Members
+          </button>
           <button
             onClick={() => { setEditingProj(null); setModalOpen(true) }}
             className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl shadow-sm transition-colors"
@@ -323,6 +331,14 @@ export default function Dashboard({ darkMode, onToggleDark, onOpenProject }) {
           project={editingProj}
           onClose={() => setModalOpen(false)}
           onSave={handleSaveProject}
+        />
+      )}
+
+      {/* Team Members Modal */}
+      {manageMembersOpen && (
+        <ManageMembersModal
+          projects={projects}
+          onClose={() => setManageMembersOpen(false)}
         />
       )}
     </div>

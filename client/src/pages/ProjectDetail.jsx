@@ -1,17 +1,20 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Moon, Sun, Plus, Pencil } from 'lucide-react'
+import { ArrowLeft, Moon, Sun, Plus, Pencil, Users } from 'lucide-react'
 import KpiCards    from '../components/KpiCards'
 import TaskTable   from '../components/TaskTable'
 import TrendChart  from '../components/TrendChart'
 import TaskModal   from '../components/TaskModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import DateRangePicker from '../components/DateRangePicker'
+import ManageMembersModal from '../components/ManageMembersModal'
 import { toast }   from '../components/ToastContainer'
 import { subDays, format } from 'date-fns'
 
 export default function ProjectDetail({ project, darkMode, onToggleDark, onBack }) {
   const [tasks,      setTasks]      = useState([])
   const [loading,    setLoading]    = useState(true)
+  const [allProjects, setAllProjects] = useState([project])
+  const [manageMembersOpen, setManageMembersOpen] = useState(false)
   const [dateRange,  setDateRange]  = useState({
     start: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
     end:   format(new Date(), 'yyyy-MM-dd'),
@@ -20,6 +23,10 @@ export default function ProjectDetail({ project, darkMode, onToggleDark, onBack 
   const [editingTask,  setEditingTask]  = useState(null)
   const [deletingTask, setDeletingTask] = useState(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/projects').then(r => r.json()).then(setAllProjects).catch(() => {})
+  }, [])
 
   const fetchTasks = useCallback(async () => {
     setLoading(true)
@@ -96,6 +103,12 @@ export default function ProjectDetail({ project, darkMode, onToggleDark, onBack 
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setManageMembersOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white/70 dark:bg-gray-800/70 hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-xl shadow-sm border border-white/80 dark:border-gray-700 transition-colors"
+          >
+            <Users size={15} /> Members
+          </button>
+          <button
             onClick={() => { setEditingTask(null); setModalOpen(true) }}
             className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl shadow-sm transition-colors"
           >
@@ -146,8 +159,16 @@ export default function ProjectDetail({ project, darkMode, onToggleDark, onBack 
         <TaskModal
           task={editingTask}
           projectId={project.id}
+          projects={allProjects}
           onClose={() => setModalOpen(false)}
           onSave={handleSave}
+        />
+      )}
+      {manageMembersOpen && (
+        <ManageMembersModal
+          currentProjectId={project.id}
+          projects={allProjects}
+          onClose={() => setManageMembersOpen(false)}
         />
       )}
       {deletingTask && (
