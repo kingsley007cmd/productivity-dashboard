@@ -22,50 +22,6 @@ function writeDB(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2))
 }
 
-// ─── Seed Sample Data ─────────────────────────────────────────────────────────
-function seedIfEmpty() {
-  const db = readDB()
-  if (db.tasks.length > 0) return
-
-  console.log('Seeding sample data...')
-  const people = ['Alice', 'Bob', 'Carol', 'David', 'Eve']
-  const statuses = ['pending', 'in-progress', 'completed', 'overdue']
-  const priorities = ['low', 'medium', 'high']
-  const taskNames = [
-    'Design landing page', 'Fix login bug', 'Write unit tests', 'Set up CI/CD',
-    'Refactor auth module', 'Update documentation', 'Code review PRs', 'Deploy to staging',
-    'Database migration', 'Performance audit', 'Add dark mode', 'Mobile responsiveness',
-    'API rate limiting', 'User onboarding flow', 'Email notification system',
-    'Analytics integration', 'Security audit', 'Load testing', 'Accessibility review',
-    'Release v2.0', 'Customer feedback analysis', 'Backlog grooming', 'Sprint planning',
-    'OKR review meeting', 'Team retrospective', 'Hire frontend dev', 'Set up monitoring',
-    'SSL certificate renewal', 'Backup automation', 'Cost optimization'
-  ]
-
-  const today = new Date()
-  const tasks = []
-
-  for (let i = 0; i < 80; i++) {
-    const daysOffset = Math.floor(Math.random() * 60) - 30
-    const dueDate = new Date(today)
-    dueDate.setDate(today.getDate() + daysOffset)
-    const dueDateStr = dueDate.toISOString().split('T')[0]
-
-    tasks.push({
-      id: i + 1,
-      title: taskNames[i % taskNames.length] + (i >= taskNames.length ? ` (${Math.floor(i / taskNames.length) + 1})` : ''),
-      assignee: people[Math.floor(Math.random() * people.length)],
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      priority: priorities[Math.floor(Math.random() * priorities.length)],
-      due_date: dueDateStr
-    })
-  }
-
-  writeDB({ tasks, nextId: 81 })
-  console.log('Seeded 80 sample tasks.')
-}
-
-seedIfEmpty()
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
